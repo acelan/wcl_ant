@@ -1,0 +1,12 @@
+## Interface: 20504
+## Interface-BCC: 20504
+## Title: WCLRanks
+## Version: 1.2.__DATE__
+## Author: acelan@acelan.idv.tw
+## DefaultState: enabled
+
+Libs\LibStub\LibStub.lua
+Libs\AceTimer-3.0\AceTimer-3.0.xml
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Data\WCLRanks.xml
+WCLRanks.lua
