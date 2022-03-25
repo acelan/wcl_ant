@@ -101,6 +101,7 @@ def gen_query_user(server_name, username, userdata):
 
             query += "c%s: character(name: \"%s\", serverRegion:\"tw\", serverSlug: \"%s\") { id name " % (idx, name, server_name)
             query += "Karazhan: zoneRankings(zoneID:1007, partition: %s, metric: %s) " % (partition, k_metric)
+            query += "ZulAman: zoneRankings(zoneID:1012, partition: %s, metric: %s) " % (partition, k_metric)
             query += "Gruul_Magtheridon: zoneRankings(zoneID:1008, partition: %s, metric: %s) " % (partition, g_metric)
             query += "SSC_TK: zoneRankings(zoneID:1010, partition: %s, metric: %s) " % (partition, t_metric)
             query += "BT_Hyjal: zoneRankings(zoneID:1011, partition: %s, metric: %s) " % (partition, h_metric)
@@ -241,6 +242,14 @@ def update_userdata(server_id, server_name, username):
                 list_str += add_color_code(user["name"], percent)
                 msg += "K: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
                 list_str += "K: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
+            if user["ZulAman"] and user["ZulAman"]["allStars"]:
+                allstars = best_rank(user["ZulAman"]["allStars"])
+                #print("allstars = %s" % allstars)
+                percent = allstars["rankPercent"] #(1-allstars["rank"]/allstars["total"])*100
+                msg += add_color_code(user["name"], percent)
+                list_str += add_color_code(user["name"], percent)
+                msg += "Z: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
+                list_str += "Z: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
             if user["Gruul_Magtheridon"] and user["Gruul_Magtheridon"]["allStars"]:
                 #allstars = user["Gruul_Magtheridon"]["allStars"][0]
                 allstars = best_rank(user["Gruul_Magtheridon"]["allStars"])
