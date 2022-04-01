@@ -286,11 +286,11 @@ def update_userdata(server_id, server_name, username):
         print("==========================================")
         write_userdata("server/%s" % server_id, userdata)
 
-        if stop:
-            break
-
         for i in tqdm(range(450)):
             time.sleep(1)
+
+        if stop:
+            break
 
     return userdata
 
