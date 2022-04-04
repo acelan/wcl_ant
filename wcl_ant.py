@@ -31,6 +31,12 @@ def wcl_query(query):
     api_call_response = requests.post(api_url, json={"query": query}, headers=api_call_headers, verify=False)
     return api_call_response.text
 
+def query_points():
+    query = "query {rateLimitData {limitPerHour, pointsSpentThisHour, pointsResetIn}}"
+    result = wcl_query(query)
+    points = json.loads(result)["data"]["rateLimitData"]
+    return points
+
 def gen_query_report(report_code):
     idx = 1
     query = "query { reportData { \n"
@@ -204,6 +210,13 @@ def update_userdata(server_id, server_name, username):
     step = 10
     userdata = read_userdata("server/%s" % server_id) or {}
     while True:
+        points = query_points() # requires 23 points
+        print("\nRate Limit: %s points / hour, Points Spent: %s Points Reset In: %s minutes\n" % (points["limitPerHour"], points["pointsSpentThisHour"], int(points["pointsResetIn"]/60)))
+        if int(points["limitPerHour"]) - int(points["pointsSpentThisHour"]) < 500:
+            print("Run out of points, time to sleep for %s seconds" % points["pointsResetIn"])
+            for i in tqdm(range(int(points["pointsResetIn"]) + 10)):
+                time.sleep(1)
+
         end = idx + step
         stop = False
         if idx + step >= len_username:
@@ -285,9 +298,6 @@ def update_userdata(server_id, server_name, username):
         print(msg)
         print("==========================================")
         write_userdata("server/%s" % server_id, userdata)
-
-        for i in tqdm(range(540)):
-            time.sleep(1)
 
         if stop:
             break
