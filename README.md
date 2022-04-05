@@ -32,25 +32,20 @@ Ex.
             "userlist" : ["USER1_ID", "USER2_ID", "USER3_ID"],
             "guildlist": ["GUILD1_NAME", "GUILD2_NAME", "GUILD3_NAME"]
         },
-        "5053": {	# a real example
+        "5053": {	# an real example
             "name" : "瑪拉頓",
             "userlist" : ["1396448", "1254127", "1284707", "1506151","1217075","1033941", "1510869", "1516388", "994406", "1644080", "1100596", "1679238", "1592486", "459700"],
             "guildlist": ["無與倫比的自由", "QAQ", "老兄村", "One Piece", "CTR", "末日天使", "Pallas", "淘金(G)團", "Nemesis", "啾尼爾", "SoF", "我只會心疼哥哥", " 黑手別黑本阿會長說我們只>收歐洲人不收非洲人", " 自由殿堂", "IMBA", "信董爽歪歪", "黑玫瑰", "糕餅舖", "輪迴夢境", "镶金玫瑰", "傲雪紛飛"]
         },
     }
 ```
-Run `gen_list.py` after the user and guild list have been set, it generates directories to contains the info of the servers.
+Run `gen_list.py` after the user and guild list have been set, it generates directories to contains the info of the servers. You need to run this script everytime you add/modify the userlist and/or guildlist.
 
 ## Run the crawler
 Just run `wcl_ant.py`, it generates `Data` directory and put all the data there.
 
 Be aware of the rate limit and the points you spent while retriving data. You can check it from the bottom of the [[profile](https://classic.warcraftlogs.com/profile)] page.
 
-To not exceed the limit, I add a sleep everytime after 10 players data is queried. Please check and modify the sleep value if it doesn't suit your case.
-```python
-    for i in tqdm(range(450)):
-        time.sleep(1)
-```
 You may consider to [[subscribe](https://www.patreon.com/warcraftlogs)] warcraftlogs for $2 per month to get 10 times of the points if your region includes too many servers to retrive all the data in one day.
 
 ## Bump the version
