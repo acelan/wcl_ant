@@ -111,6 +111,7 @@ def gen_query_user(server_name, username, userdata):
             query += "Gruul_Magtheridon: zoneRankings(zoneID:1008, partition: %s, metric: %s) " % (partition, g_metric)
             query += "SSC_TK: zoneRankings(zoneID:1010, partition: %s, metric: %s) " % (partition, t_metric)
             query += "BT_Hyjal: zoneRankings(zoneID:1011, partition: %s, metric: %s) " % (partition, h_metric)
+            query += "SunwellPlateau: zoneRankings(zoneID:1013, partition: %s, metric: %s) " % (partition, h_metric)
             query += "} \n"
             idx += 1
 
@@ -282,8 +283,15 @@ def update_userdata(server_id, server_name, username):
                 msg += "T: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
                 list_str += "T: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
             if user["BT_Hyjal"] and user["BT_Hyjal"]["allStars"]:
-                #allstars = user["SSC_TK"]["allStars"][0]
                 allstars = best_rank(user["BT_Hyjal"]["allStars"])
+                #print("allstars = %s" % allstars)
+                percent = allstars["rankPercent"] # (1-allstars["rank"]/allstars["total"])*100
+                msg += add_color_code(user["name"], percent)
+                list_str += add_color_code(user["name"], percent)
+                msg += "H: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
+                list_str += "H: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
+            if user["SunwellPlateau"] and user["SunwellPlateau"]["allStars"]:
+                allstars = best_rank(user["SunwellPlateau"]["allStars"])
                 #print("allstars = %s" % allstars)
                 percent = allstars["rankPercent"] # (1-allstars["rank"]/allstars["total"])*100
                 msg += add_color_code(user["name"], percent)
