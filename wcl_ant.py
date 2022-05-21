@@ -296,8 +296,8 @@ def update_userdata(server_id, server_name, username):
                 percent = allstars["rankPercent"] # (1-allstars["rank"]/allstars["total"])*100
                 msg += add_color_code(user["name"], percent)
                 list_str += add_color_code(user["name"], percent)
-                msg += "H: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-                list_str += "H: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
+                msg += "P: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
+                list_str += "P: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
             msg += "\""
             if list_str:
                 userdata[user["name"]] = list_str
