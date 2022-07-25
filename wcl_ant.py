@@ -198,11 +198,27 @@ def read_userdata(filepath):
         #print("read data: %s" % userdata)
         return json.loads(userdata)
 
-def best_rank(allstars):
-    best = allstars[0]
-    for allstar in allstars:
-        if best["regionRank"] > allstar["regionRank"]:
+def best_rank(zone):
+    bestSpecs = {}
+    for rankings in zone["rankings"]:
+        if "bestSpec" in rankings:
+            if rankings["bestSpec"] not in bestSpecs:
+                bestSpecs[rankings["bestSpec"]] = 0
+            bestSpecs[rankings["bestSpec"]] = bestSpecs[rankings["bestSpec"]] + 1
+
+    spec = ""
+    count = 0
+    for bestSpec in bestSpecs:
+        if bestSpecs[bestSpec] > count:
+            count = bestSpecs[bestSpec]
+            spec = bestSpec
+
+    best = zone["allStars"][0]
+    for allstar in zone["allStars"]:
+        if allstar["spec"] == spec:
             best = allstar
+            break
+
     return best
 
 def update_userdata(server_id, server_name, username):
@@ -249,7 +265,7 @@ def update_userdata(server_id, server_name, username):
             list_str = ""
             #print("user = %s" % user)
             if user["Karazhan"] and user["Karazhan"]["allStars"]:
-                allstars = best_rank(user["Karazhan"]["allStars"])
+                allstars = best_rank(user["Karazhan"])
                 #print("allstars = %s" % allstars)
                 percent = allstars["rankPercent"] #(1-allstars["rank"]/allstars["total"])*100
                 msg += add_color_code(user["name"], percent)
@@ -257,7 +273,7 @@ def update_userdata(server_id, server_name, username):
                 msg += "K: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
                 list_str += "K: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
             if user["ZulAman"] and user["ZulAman"]["allStars"]:
-                allstars = best_rank(user["ZulAman"]["allStars"])
+                allstars = best_rank(user["ZulAman"])
                 #print("allstars = %s" % allstars)
                 percent = allstars["rankPercent"] #(1-allstars["rank"]/allstars["total"])*100
                 msg += add_color_code(user["name"], percent)
@@ -266,7 +282,7 @@ def update_userdata(server_id, server_name, username):
                 list_str += "Z: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
             if user["Gruul_Magtheridon"] and user["Gruul_Magtheridon"]["allStars"]:
                 #allstars = user["Gruul_Magtheridon"]["allStars"][0]
-                allstars = best_rank(user["Gruul_Magtheridon"]["allStars"])
+                allstars = best_rank(user["Gruul_Magtheridon"])
                 #print("allstars = %s" % allstars)
                 percent = allstars["rankPercent"] # (1-allstars["rank"]/allstars["total"])*100
                 msg += add_color_code(user["name"], percent)
@@ -275,7 +291,7 @@ def update_userdata(server_id, server_name, username):
                 list_str += "G: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
             if user["SSC_TK"] and user["SSC_TK"]["allStars"]:
                 #allstars = user["SSC_TK"]["allStars"][0]
-                allstars = best_rank(user["SSC_TK"]["allStars"])
+                allstars = best_rank(user["SSC_TK"])
                 #print("allstars = %s" % allstars)
                 percent = allstars["rankPercent"] # (1-allstars["rank"]/allstars["total"])*100
                 msg += add_color_code(user["name"], percent)
@@ -283,7 +299,7 @@ def update_userdata(server_id, server_name, username):
                 msg += "T: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
                 list_str += "T: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
             if user["BT_Hyjal"] and user["BT_Hyjal"]["allStars"]:
-                allstars = best_rank(user["BT_Hyjal"]["allStars"])
+                allstars = best_rank(user["BT_Hyjal"])
                 #print("allstars = %s" % allstars)
                 percent = allstars["rankPercent"] # (1-allstars["rank"]/allstars["total"])*100
                 msg += add_color_code(user["name"], percent)
@@ -291,7 +307,7 @@ def update_userdata(server_id, server_name, username):
                 msg += "H: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
                 list_str += "H: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
             if user["SunwellPlateau"] and user["SunwellPlateau"]["allStars"]:
-                allstars = best_rank(user["SunwellPlateau"]["allStars"])
+                allstars = best_rank(user["SunwellPlateau"])
                 #print("allstars = %s" % allstars)
                 percent = allstars["rankPercent"] # (1-allstars["rank"]/allstars["total"])*100
                 msg += add_color_code(user["name"], percent)
