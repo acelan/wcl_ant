@@ -34,7 +34,10 @@ def wcl_query(query):
 def query_points():
     query = "query {rateLimitData {limitPerHour, pointsSpentThisHour, pointsResetIn}}"
     result = wcl_query(query)
-    points = json.loads(result)["data"]["rateLimitData"]
+    try:
+        points = json.loads(result)["data"]["rateLimitData"]
+    except:
+        print(json.loads(result))
     return points
 
 def gen_query_report(report_code):
@@ -66,8 +69,8 @@ def gen_query_code(server_name, users, guilds, starttime):
 
 def gen_query_user(server_name, username, userdata):
     idx = 1
-    partition = 6
-    partition_name = "P5"
+    partition = 1
+    partition_name = "P1"
     userdata["PHASE"] = partition_name
     query = "query { characterData { \n"
     if username:
@@ -106,12 +109,8 @@ def gen_query_user(server_name, username, userdata):
                         h_metric = metric
 
             query += "c%s: character(name: \"%s\", serverRegion:\"tw\", serverSlug: \"%s\") { id name " % (idx, name, server_name)
-            query += "Karazhan: zoneRankings(zoneID:1007, partition: %s, metric: %s) " % (partition, k_metric)
-            query += "ZulAman: zoneRankings(zoneID:1012, partition: %s, metric: %s) " % (partition, k_metric)
-            query += "Gruul_Magtheridon: zoneRankings(zoneID:1008, partition: %s, metric: %s) " % (partition, g_metric)
-            query += "SSC_TK: zoneRankings(zoneID:1010, partition: %s, metric: %s) " % (partition, t_metric)
-            query += "BT_Hyjal: zoneRankings(zoneID:1011, partition: %s, metric: %s) " % (partition, h_metric)
-            query += "SunwellPlateau: zoneRankings(zoneID:1013, partition: %s, metric: %s) " % (partition, h_metric)
+            query += "K_Naxx_Sarth_Maly_10: zoneRankings(zoneID: 1015, size: 10, partition: %s, metric: %s), " % (partition, k_metric)
+            query += "Z_Naxx_Sarth_Maly_25: zoneRankings(zoneID: 1015, size: 25, partition: %s, metric: %s), " % (partition, k_metric)
             query += "} \n"
             idx += 1
 
@@ -223,8 +222,9 @@ def best_rank(zone):
 
 def update_userdata(server_id, server_name, username):
     len_username = len(username)
+    counter = 0
     idx = 1
-    step = 10
+    step = 50
     userdata = read_userdata("server/%s" % server_id) or {}
     while True:
         points = query_points() # requires 23 points
@@ -232,6 +232,11 @@ def update_userdata(server_id, server_name, username):
         if int(points["limitPerHour"]) - int(points["pointsSpentThisHour"]) < 500:
             print("Run out of points, time to sleep for %s seconds" % points["pointsResetIn"])
             for i in tqdm(range(int(points["pointsResetIn"]) + 10)):
+                time.sleep(1)
+
+        if counter == 60:
+            print("Sleep for 1 hour as we're reaching rate limit!!")
+            for i in tqdm(3600):
                 time.sleep(1)
 
         end = idx + step
@@ -245,6 +250,7 @@ def update_userdata(server_id, server_name, username):
 
         query = gen_query_user(server_name, username[idx:end], userdata)
         idx += step
+        counter += 1
         print("query = %s" % query)
         result = wcl_query(query)
         result = result.replace("Noclasssetforthischaracter.ClicktheUpdatebuttonintheupperrighttoestablishaclass.", "")
@@ -261,62 +267,22 @@ def update_userdata(server_id, server_name, username):
 
         msg = ""
         for key, user in user_data.items():
-            msg += "\n[\"%s\"] =\"|" % (user["name"])
-            list_str = ""
             #print("user = %s" % user)
-            if user["Karazhan"] and user["Karazhan"]["allStars"]:
-                allstars = best_rank(user["Karazhan"])
-                #print("allstars = %s" % allstars)
-                percent = allstars["rankPercent"] #(1-allstars["rank"]/allstars["total"])*100
-                msg += add_color_code(user["name"], percent)
-                list_str += add_color_code(user["name"], percent)
-                msg += "K: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-                list_str += "K: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-            if user["ZulAman"] and user["ZulAman"]["allStars"]:
-                allstars = best_rank(user["ZulAman"])
-                #print("allstars = %s" % allstars)
-                percent = allstars["rankPercent"] #(1-allstars["rank"]/allstars["total"])*100
-                msg += add_color_code(user["name"], percent)
-                list_str += add_color_code(user["name"], percent)
-                msg += "Z: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-                list_str += "Z: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-            if user["Gruul_Magtheridon"] and user["Gruul_Magtheridon"]["allStars"]:
-                #allstars = user["Gruul_Magtheridon"]["allStars"][0]
-                allstars = best_rank(user["Gruul_Magtheridon"])
-                #print("allstars = %s" % allstars)
-                percent = allstars["rankPercent"] # (1-allstars["rank"]/allstars["total"])*100
-                msg += add_color_code(user["name"], percent)
-                list_str += add_color_code(user["name"], percent)
-                msg += "G: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-                list_str += "G: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-            if user["SSC_TK"] and user["SSC_TK"]["allStars"]:
-                #allstars = user["SSC_TK"]["allStars"][0]
-                allstars = best_rank(user["SSC_TK"])
-                #print("allstars = %s" % allstars)
-                percent = allstars["rankPercent"] # (1-allstars["rank"]/allstars["total"])*100
-                msg += add_color_code(user["name"], percent)
-                list_str += add_color_code(user["name"], percent)
-                msg += "T: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-                list_str += "T: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-            if user["BT_Hyjal"] and user["BT_Hyjal"]["allStars"]:
-                allstars = best_rank(user["BT_Hyjal"])
-                #print("allstars = %s" % allstars)
-                percent = allstars["rankPercent"] # (1-allstars["rank"]/allstars["total"])*100
-                msg += add_color_code(user["name"], percent)
-                list_str += add_color_code(user["name"], percent)
-                msg += "H: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-                list_str += "H: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-            if user["SunwellPlateau"] and user["SunwellPlateau"]["allStars"]:
-                allstars = best_rank(user["SunwellPlateau"])
-                #print("allstars = %s" % allstars)
-                percent = allstars["rankPercent"] # (1-allstars["rank"]/allstars["total"])*100
-                msg += add_color_code(user["name"], percent)
-                list_str += add_color_code(user["name"], percent)
-                msg += "P: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-                list_str += "P: %s/%0.2f%%B%sD%s(%s)|" % (allstars["points"], ((1-allstars["rank"]/allstars["total"])*100), allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-            msg += "\""
-            if list_str:
-                userdata[user["name"]] = list_str
+            for zone in {"K_Naxx_Sarth_Maly_10", "Z_Naxx_Sarth_Maly_25"}:
+                msg += "\n[\"%s\"] =\"|" % (user["name"])
+                list_str = ""
+                if user[zone] and user[zone]["allStars"]:
+                    allstars = best_rank(user[zone])
+                    #print("allstars = %s" % allstars)
+                    percent = allstars["rankPercent"] #(1-allstars["rank"]/allstars["total"])*100
+                    msg += add_color_code(user["name"], percent)
+                    list_str += add_color_code(user["name"], percent)
+
+                    msg += "%s: %s/%0.2f%%B%sD%s(%s)|" % (zone[:1], allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
+                    list_str += "%s: %s/%0.2f%%B%sD%s(%s)|" % (zone[:1], allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
+                    msg += "\""
+                    if list_str:
+                        userdata[user["name"]] = list_str
         msg += "\n"
         print("==========================================")
         print(msg)
