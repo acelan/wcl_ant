@@ -268,9 +268,9 @@ def update_userdata(server_id, server_name, username):
         msg = ""
         for key, user in user_data.items():
             #print("user = %s" % user)
+            list_str = ""
+            msg += "\n[\"%s\"] =\"|" % (user["name"])
             for zone in {"K_Naxx_Sarth_Maly_10", "Z_Naxx_Sarth_Maly_25"}:
-                msg += "\n[\"%s\"] =\"|" % (user["name"])
-                list_str = ""
                 if user[zone] and user[zone]["allStars"]:
                     allstars = best_rank(user[zone])
                     #print("allstars = %s" % allstars)
@@ -280,9 +280,9 @@ def update_userdata(server_id, server_name, username):
 
                     msg += "%s: %s/%0.2f%%B%sD%s(%s)|" % (zone[:1], allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
                     list_str += "%s: %s/%0.2f%%B%sD%s(%s)|" % (zone[:1], allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-                    msg += "\""
-                    if list_str:
-                        userdata[user["name"]] = list_str
+            msg += "\""
+            if list_str:
+                userdata[user["name"]] = list_str
         msg += "\n"
         print("==========================================")
         print(msg)
