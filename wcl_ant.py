@@ -274,12 +274,13 @@ def update_userdata(server_id, server_name, username):
                 if user[zone] and user[zone]["allStars"]:
                     allstars = best_rank(user[zone])
                     #print("allstars = %s" % allstars)
-                    percent = allstars["rankPercent"] #(1-allstars["rank"]/allstars["total"])*100
+                    percent = float(allstars["rankPercent"])
                     msg += add_color_code(user["name"], percent)
                     list_str += add_color_code(user["name"], percent)
+                    points = float(allstars["points"])
 
-                    msg += "%s: %s/%0.2f%%B%sD%s(%s)|" % (zone[:1], allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
-                    list_str += "%s: %s/%0.2f%%B%sD%s(%s)|" % (zone[:1], allstars["points"], percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
+                    msg += "%s: %0.2f/%0.2f%%B%sD%s(%s)|" % (zone[:1], points, percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
+                    list_str += "%s: %0.2f/%0.2f%%B%sD%s(%s)|" % (zone[:1], points, percent, allstars["serverRank"], allstars["regionRank"], allstars["spec"])
             msg += "\""
             if list_str:
                 userdata[user["name"]] = list_str
