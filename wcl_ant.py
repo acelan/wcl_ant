@@ -27,8 +27,19 @@ access_token = tokens['access_token']
 servers = [f for f in os.listdir('server') if not os.path.isfile(os.path.join("server", f))]
 
 def wcl_query(query):
-    api_call_headers = {'Authorization': 'Bearer ' + access_token}
-    api_call_response = requests.post(api_url, json={"query": query}, headers=api_call_headers, verify=False)
+    while True:
+        api_call_headers = {'Authorization': 'Bearer ' + access_token}
+        api_call_response = requests.post(api_url, json={"query": query}, headers=api_call_headers, verify=False)
+        # {'status': 429, 'error': 'Too many requests. The owner of this API key can subscribe on Patreon to increase their request limit.'}
+        try:
+            if "status" not in json.loads(api_call_response.text) or json.loads(api_call_response.text)["status"] != 429:
+                break
+        except:
+            print("not json format \"%s\"" % api_call_response.text)
+        print(api_call_response.text)
+        print("Got 429, let's take a longer sleep")
+        time.sleep(3600)
+
     return api_call_response.text
 
 def query_points():
