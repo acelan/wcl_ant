@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import os
 import datetime
@@ -31,7 +31,10 @@ with open(WCLRanks_toc) as fp:
 toc.close()
 
 # copy data
-getoutput("cp -a Data %s/" % WCLRanks_path)
+#getoutput("cp -a Data %s/" % WCLRanks_path)
+#find Data -name *.lua -exec bash -c "sed -e 's/\"{/{/g' -e 's/}\"/}/g' \"{}\" > WCLRanks/\"{}\"" \;
+ret = getoutput('find Data -name *.lua -exec bash -c "sed -e \'s/\\\"{/{/g\' -e \'s/}\\\"/}/g\' \"{}\" > %s/\"{}\"" \;' % WCLRanks_path)
+#print(ret)
 
 # ## Version: 1.0.20211009
 version = version.replace("## Version: ","")

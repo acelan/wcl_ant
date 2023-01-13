@@ -1,12 +1,16 @@
 ## Interface: 30400
 ## Interface-Wrath: 30400
 ## Title: WCLRanks
-## Version: 2.0.__DATE__
+## Version: 3.0.__DATE__
 ## Author: acelan@acelan.idv.tw
 ## DefaultState: enabled
+## SavedVariables: WCLRanksDB
 
 Libs\LibStub\LibStub.lua
 Libs\AceTimer-3.0\AceTimer-3.0.xml
 Libs\AceAddon-3.0\AceAddon-3.0.xml
 Data\WCLRanks.xml
+Locale\enUS.lua
+Locale\zhTW.lua
 WCLRanks.lua
+WCLRanks_BaseData.lua
