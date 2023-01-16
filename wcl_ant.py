@@ -350,7 +350,12 @@ def update_userdata(server_id, server_name, username):
         msg = ""
         for key, user in user_data.items():
             #print("user = %s" % user)
-            class_id = user["classID"]
+            try:
+                class_id = user["classID"]
+            except:
+                print("============ Error ============")
+                print(user)
+                continue
             list_str = ""
             msg += "\n[\"%s\"] =\"" % (user["name"])
             for zone in zones:
