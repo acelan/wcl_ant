@@ -407,12 +407,12 @@ def write_target(server_name, filename, userdata):
         os.mkdir(path)
 
     f = open( path + filename, 'w')
-    f.write("if(GetRealmName() == \"%s\")then\nWP_Database = {\n" % server_name)
+    f.write("if GetRealmName() ~= \"%s\" then return end\nWP_Database = {\n" % server_name)
 
     for name, stat  in userdata.items():
         f.write("[\"%s\"] = \"%s\",\n" % (name, stat))
 
-    f.write("}\nend")
+    f.write("}\n")
     f.close()
 
 def ant_run(server_id, server_name, userlist, guildlist, starttime):
