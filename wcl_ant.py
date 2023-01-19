@@ -171,8 +171,8 @@ def gen_query_code(server_name, users, guilds, starttime):
 
 def gen_query_user(server_name, username, userdata):
     idx = 1
-    partition = 1
-    partition_name = "P1"
+    partition = 2
+    partition_name = "P2"
     userdata["PHASE"] = partition_name
     query = "query { characterData { \n"
     if username:
