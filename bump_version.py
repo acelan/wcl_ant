@@ -42,8 +42,8 @@ version = re.sub("[^0-9.]", "", version)
 
 commit_msg = ""
 for server_id in [d for d in os.listdir('server') if os.path.isdir(os.path.join('server', d))]:
-	added = getoutput("cd %s; git diff Data/%s.lua | grep -- + | grep -v @@ | wc -l" % (WCLRanks_path, server_id))
-	deleted = getoutput("cd %s; git diff Data/%s.lua | grep -- - | grep -v @@ | grep -v \"diff --git\" | wc -l" % (WCLRanks_path, server_id))
+	added = getoutput("cd %s; git diff Data/%s.lua | grep -- \^+ | grep -v @@ | wc -l" % (WCLRanks_path, server_id))
+	deleted = getoutput("cd %s; git diff Data/%s.lua | grep -- \^- | grep -v @@ | grep -v \"diff --git\" | wc -l" % (WCLRanks_path, server_id))
 	server_name = pickle.load(open('server/%s/name.pkl' % server_id, 'rb'))
 	commit_msg = commit_msg + "%s:\n\tupdated: %s\n\tnew: %s\n" % (server_name, int(deleted), int(added) - int(deleted))
 ret = getoutput("cd %s; git commit -a -s -m \"daily update: %s\n\n%s\"" % (WCLRanks_path, date_version, commit_msg))

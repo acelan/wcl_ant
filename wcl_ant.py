@@ -25,10 +25,11 @@ access_token = tokens['access_token']
 #print("access token: %s" % access_token)
 
 servers = [f for f in os.listdir('server') if not os.path.isfile(os.path.join("server", f))]
-zones = ["1015", "1016"]
+zones = ["1015", "1016", "1017"]
 
 bosses = { "1015": [734, 742, 101107, 101108, 101109, 101110, 101111, 101112, 101113, 101114, 101115, 101116, 101117, 101118, 101119, 101120, 101121],
-           "1016": [772] }
+           "1016": [772],
+           "1017": [744, 745, 746, 747, 748, 749, 750, 751, 751, 752, 754, 755, 756, 757] }
 
 def get_spec_id(class_id, spec):
     classes = {
@@ -111,6 +112,15 @@ def get_spec_id(class_id, spec):
         },
     }
     spec_id = '0'
+    if class_id == 0:
+        for classs in classes:
+            if spec in classes[classs]['specs']:
+                # found possible class
+                if class_id == 0:
+                    class_id = classs
+                else: # not an uniq spec name, can't determinate the class
+                    class_id = 0
+                    break
     try:
         spec_id = classes[class_id]['specs'][spec]['id']
     except:
@@ -306,7 +316,7 @@ def update_userdata(server_id, server_name, username):
     len_username = len(username)
     counter = 0
     idx = 1
-    step = 50
+    step = 100
     userdata = read_userdata("server/%s" % server_id) or {}
     while True:
         points = query_points() # requires 23 points
@@ -397,6 +407,9 @@ def update_userdata(server_id, server_name, username):
 
         if stop:
             break
+
+        # to fix 429 error, sleep 10 seconds every round
+        time.sleep(10)
 
     return userdata
 
