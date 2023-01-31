@@ -112,15 +112,6 @@ def get_spec_id(class_id, spec):
         },
     }
     spec_id = '0'
-    if class_id == 0:
-        for classs in classes:
-            if spec in classes[classs]['specs']:
-                # found possible class
-                if class_id == 0:
-                    class_id = classs
-                else: # not an uniq spec name, can't determinate the class
-                    class_id = 0
-                    break
     try:
         spec_id = classes[class_id]['specs'][spec]['id']
     except:
@@ -137,7 +128,7 @@ def wcl_query(query):
                 break
         except:
             print("not json format \"%s\"" % api_call_response.text)
-        print(api_call_response.text)
+        #print(api_call_response.text)
         print("Got 429, let's take a longer sleep")
         time.sleep(3600)
 
@@ -316,7 +307,7 @@ def update_userdata(server_id, server_name, username):
     len_username = len(username)
     counter = 0
     idx = 1
-    step = 100
+    step = 30
     userdata = read_userdata("server/%s" % server_id) or {}
     while True:
         points = query_points() # requires 23 points
@@ -362,10 +353,23 @@ def update_userdata(server_id, server_name, username):
             #print("user = %s" % user)
             try:
                 class_id = user["classID"]
+                if class_id == 0:
+                    for classs in classes:
+                        if spec in classes[classs]['specs']:
+                            # found possible class
+                            if class_id == 0:
+                                class_id = classs
+                            else: # not an uniq spec name, can't determinate the class
+                                class_id = 0
+                                break
+                # can't determinate the class
+                if class_id == 0:
+                    continue
             except:
                 print("============ Error ============")
                 print(user)
                 continue
+
             list_str = ""
             msg += "\n[\"%s\"] =\"" % (user["name"])
             for zone in zones:
@@ -398,6 +402,7 @@ def update_userdata(server_id, server_name, username):
             if list_str:
                 now = int(datetime.datetime.now().timestamp())
                 userdata[user["name"]] = "{%s, %s, {%s}}" % (class_id, now, list_str)
+
                 msg += userdata[user["name"]]
         msg += "\n"
         print("==========================================")
