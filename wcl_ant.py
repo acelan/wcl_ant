@@ -126,6 +126,8 @@ def wcl_query(query):
         try:
             if "status" not in json.loads(api_call_response.text) or json.loads(api_call_response.text)["status"] != 429:
                 break
+            else:
+                print("Unexpected outpur: %s" % api_call_response.text)
         except:
             print("not json format \"%s\"" % api_call_response.text)
         #print(api_call_response.text)
@@ -303,23 +305,32 @@ def read_userdata(filepath):
         #print("read data: %s" % userdata)
         return json.loads(userdata)
 
+def write_target(server_name, filename, userdata):
+    path = "Data/"
+
+    if not os.path.exists(path):
+        os.mkdir(path)
+
+    f = open( path + filename, 'w')
+    f.write("if GetRealmName() ~= \"%s\" then return end\nWP_Database = {\n" % server_name)
+
+    for name, stat  in userdata.items():
+        f.write("[\"%s\"] = \"%s\",\n" % (name, stat))
+
+    f.write("}\n")
+    f.close()
+
 def update_userdata(server_id, server_name, username):
     len_username = len(username)
-    counter = 0
     idx = 1
-    step = 30
+    step = 40
     userdata = read_userdata("server/%s" % server_id) or {}
     while True:
         points = query_points() # requires 23 points
-        print("\nRate Limit: %s points / hour, Points Spent: %s Points Reset In: %s minutes\n" % (points["limitPerHour"], points["pointsSpentThisHour"], int(points["pointsResetIn"]/60)))
+        print("\nRate Limit: %s points / hour, Points Spent: %s Points, Reset In: %s minutes\n" % (points["limitPerHour"], points["pointsSpentThisHour"], int(points["pointsResetIn"]/60)))
         if int(points["limitPerHour"]) - int(points["pointsSpentThisHour"]) < 500:
             print("Run out of points, time to sleep for %s seconds" % points["pointsResetIn"])
             for i in tqdm(range(int(points["pointsResetIn"]) + 10)):
-                time.sleep(1)
-
-        if counter == 60:
-            print("Sleep for 1 hour as we're reaching rate limit!!")
-            for i in tqdm(3600):
                 time.sleep(1)
 
         end = idx + step
@@ -333,7 +344,6 @@ def update_userdata(server_id, server_name, username):
 
         query = gen_query_user(server_name, username[idx:end], userdata)
         idx += step
-        counter += 1
         print("query = %s" % query)
         result = wcl_query(query)
         result = result.replace("Noclasssetforthischaracter.ClicktheUpdatebuttonintheupperrighttoestablishaclass.", "")
@@ -404,6 +414,7 @@ def update_userdata(server_id, server_name, username):
                 userdata[user["name"]] = "{%s, %s, {%s}}" % (class_id, now, list_str)
 
                 msg += userdata[user["name"]]
+            write_target(server_name, "%s.lua" % server_id, userdata)
         msg += "\n"
         print("==========================================")
         print(msg)
@@ -417,21 +428,6 @@ def update_userdata(server_id, server_name, username):
         time.sleep(10)
 
     return userdata
-
-def write_target(server_name, filename, userdata):
-    path = "Data/"
-
-    if not os.path.exists(path):
-        os.mkdir(path)
-
-    f = open( path + filename, 'w')
-    f.write("if GetRealmName() ~= \"%s\" then return end\nWP_Database = {\n" % server_name)
-
-    for name, stat  in userdata.items():
-        f.write("[\"%s\"] = \"%s\",\n" % (name, stat))
-
-    f.write("}\n")
-    f.close()
 
 def ant_run(server_id, server_name, userlist, guildlist, starttime):
     report_code = query_code(server_name, userlist, guildlist, starttime)

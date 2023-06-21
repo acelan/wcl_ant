@@ -1,5 +1,5 @@
-## Interface: 30401
-## Interface-Wrath: 30401
+## Interface: 30402
+## Interface-Wrath: 30402
 ## Title: WCLRanks
 ## Version: 3.1.__DATE__
 ## Author: acelan@acelan.idv.tw
