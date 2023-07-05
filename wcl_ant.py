@@ -41,7 +41,8 @@ def get_spec_id(class_id, spec):
                 'Frost':{'id':'2','name':'Frost','slug':'Frost','icon':'Interface/AddOns/WCLRanks/Icons/classes:%w:%h:0:0:256:512:72:108:144:180'},
                 'Unholy':{'id':'3','name':'Unholy','slug':'Unholy','icon':'Interface/AddOns/WCLRanks/Icons/classes:%w:%h:0:0:256:512:108:144:144:180'},
                 'Lichborne':{'id':'4','name':'Lichborne','slug':'Lichborne','icon':'Interface/AddOns/WCLRanks/Icons/classes:%w:%h:0:0:256:512:72:108:144:180'},
-                'Runeblade':{'id':'5','name':'Runeblade','slug':'Runeblade','icon':'Interface/AddOns/WCLRanks/Icons/classes:%w:%h:0:0:256:512:36:72:144:180'}
+                'Runeblade':{'id':'5','name':'Runeblade','slug':'Runeblade','icon':'Interface/AddOns/WCLRanks/Icons/classes:%w:%h:0:0:256:512:36:72:144:180'},
+                'BloodDPS':{'id':'6','name':'Blood','slug':'Blood','icon':'Interface/AddOns/WCLRanks/Icons/classes:%w:%h:0:0:256:512:36:72:144:180'}
             }
         },
         2:{
