@@ -7,6 +7,7 @@ import os
 from tqdm import tqdm
 import datetime
 import pickle
+import psutil
 
 from config import client_id, client_secret
 
@@ -276,7 +277,7 @@ def parse_rankings(class_id, zone, rankings):
             spec_id = 0
             if boss_id == ranking["encounter"]["id"]:
                 # when doing mindcontrol in NAXX Instructor Razuvious, "total" value is 0 with no ranks
-                if ranking["totalKills"] != 0 and ranking["allStars"]["total"] != 0:
+                if ranking["totalKills"] != 0 and ranking["allStars"] and ranking["allStars"]["total"] != 0:
                     killed = killed + 1
                     points = float(ranking["allStars"]["points"])
                     rank = ranking["allStars"]["rank"]
@@ -454,6 +455,27 @@ def update_xml():
     f = open("Data/WCLRanks.xml", 'w')
     f.write(content)
     f.close()
+
+def findProcessIdByName(processName):
+    '''
+    Get a list of all the PIDs of a all the running process whose name contains
+    the given string processName
+    '''
+    listOfProcessObjects = []
+    #Iterate over the all the running process
+    for proc in psutil.process_iter():
+       try:
+           pinfo = proc.as_dict(attrs=['pid', 'name', 'create_time'])
+           # Check if process name contains the given name string.
+           if processName.lower() in pinfo['name'].lower() :
+               listOfProcessObjects.append(pinfo)
+       except (psutil.NoSuchProcess, psutil.AccessDenied , psutil.ZombieProcess) :
+           pass
+    return listOfProcessObjects;
+
+listOfProcessIds = findProcessIdByName('wcl_ant.py')
+if len(listOfProcessIds) > 1:
+    exit(-1)
 
 for server_id in servers:
     server_name = pickle.load(open('server/%s/name.pkl' % server_id, 'rb'))
