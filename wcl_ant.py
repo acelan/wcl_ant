@@ -26,13 +26,14 @@ access_token = tokens['access_token']
 #print("access token: %s" % access_token)
 
 servers = [f for f in os.listdir('server') if not os.path.isfile(os.path.join("server", f))]
-zones = ["1015", "1016", "1017", "1018", "1019"]
+zones = ["1015", "1016", "1017", "1018", "1019", "1020"]
 
 bosses = { "1015": [734, 742, 101107, 101108, 101109, 101110, 101111, 101112, 101113, 101114, 101115, 101116, 101117, 101118, 101119, 101120, 101121],
            "1016": [772, 774],
            "1017": [744, 745, 746, 747, 748, 749, 750, 751, 751, 752, 754, 755, 756, 757],
            "1018": [629, 633, 641, 645],
-           "1019": [101084] }
+           "1019": [101084],
+           "1020": [845, 846, 847, 848, 849, 850, 851, 852, 853, 854, 855, 856] }
 
 def get_spec_id(class_id, spec):
     classes = {
@@ -178,8 +179,8 @@ def gen_query_code(server_name, users, guilds, starttime):
 
 def gen_query_user(server_name, username, userdata):
     idx = 1
-    partition = 3
-    partition_name = "P3"
+    partition = 4
+    partition_name = "P4"
     userdata["PHASE"] = partition_name
     query = "query { characterData { \n"
     if username:
@@ -390,7 +391,7 @@ def update_userdata(server_id, server_name, username):
                 for size in ["10", "25"]:
                     zone_str = ""
                     zone_name = 'D' + zone + '_' + size
-                    if user[zone_name] and user[zone_name]["allStars"]:
+                    if zone_name in user and "allStars" in user[zone_name]:
                         for allstar in user[zone_name]["allStars"]:
                             spec = allstar["spec"]
                             spec_id = get_spec_id(class_id, spec)
