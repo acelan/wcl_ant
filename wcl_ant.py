@@ -26,14 +26,11 @@ access_token = tokens['access_token']
 #print("access token: %s" % access_token)
 
 servers = [f for f in os.listdir('server') if not os.path.isfile(os.path.join("server", f))]
-zones = ["1015", "1016", "1017", "1018", "1019", "1020"]
+zones = ["1023"]
 
-bosses = { "1015": [734, 742, 101107, 101108, 101109, 101110, 101111, 101112, 101113, 101114, 101115, 101116, 101117, 101118, 101119, 101120, 101121],
-           "1016": [772, 774],
-           "1017": [744, 745, 746, 747, 748, 749, 750, 751, 751, 752, 754, 755, 756, 757],
-           "1018": [629, 633, 641, 645],
-           "1019": [101084],
-           "1020": [845, 846, 847, 848, 849, 850, 851, 852, 853, 854, 855, 856] }
+bosses = {
+            "1023": [1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1082],
+}
 
 def get_spec_id(class_id, spec):
     classes = {
@@ -179,8 +176,8 @@ def gen_query_code(server_name, users, guilds, starttime):
 
 def gen_query_user(server_name, username, userdata):
     idx = 1
-    partition = 7
-    partition_name = "P4"
+    partition = 1
+    partition_name = "P1"
     userdata["PHASE"] = partition_name
     query = "query { characterData { \n"
     if username:
@@ -188,7 +185,8 @@ def gen_query_user(server_name, username, userdata):
             query += "c%s: character(name: \"%s\", serverRegion:\"tw\", serverSlug: \"%s\") { id name classID " % (idx, name, server_name)
             for zone in zones:
                 for size in ["10", "25"]:
-                    query += "D%s: zoneRankings(zoneID: %s, size: %s, partition: %s)," % (zone + "_" + size, zone, size, partition)
+                    # difficulty: 4, only get heroic data
+                    query += "D%s: zoneRankings(zoneID: %s, size: %s, difficulty: 4, partition: %s)," % (zone + "_" + size, zone, size, partition)
             query += "} \n"
             idx += 1
 
