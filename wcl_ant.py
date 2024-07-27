@@ -185,8 +185,7 @@ def gen_query_user(server_name, username, userdata):
             query += "c%s: character(name: \"%s\", serverRegion:\"tw\", serverSlug: \"%s\") { id name classID " % (idx, name, server_name)
             for zone in zones:
                 for size in ["10", "25"]:
-                    # difficulty: 4, only get heroic data
-                    query += "D%s: zoneRankings(zoneID: %s, size: %s, difficulty: 4, partition: %s)," % (zone + "_" + size, zone, size, partition)
+                    query += "D%s: zoneRankings(zoneID: %s, size: %s, partition: %s)," % (zone + "_" + size, zone, size, partition)
             query += "} \n"
             idx += 1
 
