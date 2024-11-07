@@ -1,5 +1,5 @@
-## Interface: 40400
-## Interface-Wrath: 40400
+## Interface: 40401
+## Interface-Wrath: 40401
 ## Title: WCLRanks
 ## Version: 5.0.__DATE__
 ## Author: acelan@acelan.idv.tw

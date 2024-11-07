@@ -176,8 +176,8 @@ def gen_query_code(server_name, users, guilds, starttime):
 
 def gen_query_user(server_name, username, userdata):
     idx = 1
-    partition = 1
-    partition_name = "P1"
+    partition = 3
+    partition_name = "P3"
     userdata["PHASE"] = partition_name
     query = "query { characterData { \n"
     if username:
@@ -342,6 +342,10 @@ def update_userdata(server_id, server_name, username):
             stop = True
 
         print("username(%s) = %s" % (len(username), username[idx:end]))
+        if len_username == 0:
+            print("No new report!!")
+            return userdata
+
         print("\n\nget user data from %s to %s/%s" % (idx, end - 1, len_username))
 
         query = gen_query_user(server_name, username[idx:end], userdata)
