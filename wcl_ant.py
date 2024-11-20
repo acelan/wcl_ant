@@ -26,10 +26,11 @@ access_token = tokens['access_token']
 #print("access token: %s" % access_token)
 
 servers = [f for f in os.listdir('server') if not os.path.isfile(os.path.join("server", f))]
-zones = ["1023"]
+zones = ["1023", "1027"]
 
 bosses = {
             "1023": [1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1082],
+            "1027": [1205, 1204, 1197, 1206, 1200, 1185, 1203],
 }
 
 def get_spec_id(class_id, spec):
