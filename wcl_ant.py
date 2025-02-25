@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.10
 
 import requests
 import json
@@ -26,11 +26,12 @@ access_token = tokens['access_token']
 #print("access token: %s" % access_token)
 
 servers = [f for f in os.listdir('server') if not os.path.isfile(os.path.join("server", f))]
-zones = ["1023", "1027"]
+zones = ["1023", "1027", "1033"]
 
 bosses = {
             "1023": [1022, 1023, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1082],
             "1027": [1205, 1204, 1197, 1206, 1200, 1185, 1203],
+            "1033": [1292, 1294, 1295, 1296, 1297, 1298, 1291, 1299],
 }
 
 def get_spec_id(class_id, spec):
@@ -177,8 +178,8 @@ def gen_query_code(server_name, users, guilds, starttime):
 
 def gen_query_user(server_name, username, userdata):
     idx = 1
-    partition = 3
-    partition_name = "P3"
+    partition = 4
+    partition_name = "P4"
     userdata["PHASE"] = partition_name
     query = "query { characterData { \n"
     if username:
