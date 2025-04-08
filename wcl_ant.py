@@ -4,6 +4,7 @@ import requests
 import json
 import time
 import os
+import socket
 from tqdm import tqdm
 import datetime
 import pickle
@@ -123,20 +124,40 @@ def get_spec_id(class_id, spec):
     return spec_id
 
 def wcl_query(query):
-    while True:
-        api_call_headers = {'Authorization': 'Bearer ' + access_token}
-        api_call_response = requests.post(api_url, json={"query": query}, headers=api_call_headers, verify=False)
-        # {'status': 429, 'error': 'Too many requests. The owner of this API key can subscribe on Patreon to increase their request limit.'}
+    max_retries = 5
+    retry_delay = 10
+
+    for attempt in range(max_retries):
         try:
-            if "status" not in json.loads(api_call_response.text) or json.loads(api_call_response.text)["status"] != 429:
-                break
+            api_call_headers = {'Authorization': 'Bearer ' + access_token}
+            api_call_response = requests.post(api_url, json={"query": query}, headers=api_call_headers, verify=False, timeout=30)
+
+            # Handle API rate limiting (429)
+            try:
+                response_data = json.loads(api_call_response.text)
+                if "status" not in response_data or response_data["status"] != 429:
+                    return api_call_response.text
+                else:
+                    print("Unexpected output: %s" % api_call_response.text)
+                    print("Got 429, let's take a longer sleep")
+                    time.sleep(3600)
+            except json.JSONDecodeError:
+                print("not json format \"%s\"" % api_call_response.text)
+                # If not a valid JSON and not a 429 error, return the response
+                if api_call_response.status_code != 429:
+                    return api_call_response.text
+                time.sleep(3600)
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout,
+                requests.exceptions.RequestException, socket.gaierror) as e:
+            # Handle connection errors with exponential backoff
+            if attempt < max_retries - 1:  # Don't sleep on the last attempt
+                sleep_time = retry_delay * (2 ** attempt)  # Exponential backoff
+                print(f"Connection error: {str(e)}. Retrying in {sleep_time} seconds... (Attempt {attempt+1}/{max_retries})")
+                time.sleep(sleep_time)
             else:
-                print("Unexpected outpur: %s" % api_call_response.text)
-        except:
-            print("not json format \"%s\"" % api_call_response.text)
-        #print(api_call_response.text)
-        print("Got 429, let's take a longer sleep")
-        time.sleep(3600)
+                print(f"Failed after {max_retries} attempts: {str(e)}")
+                raise  # Re-raise the last exception if all retries failed
 
     return api_call_response.text
 
