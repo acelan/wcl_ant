@@ -254,11 +254,9 @@ def query_username(report_code):
     except:
         print("ERROR!!! %s" % result)
 
-    # {"id":60800656,"name":"\u842c\u60e1\u99ac\u723a","server":{"id":5053}}
     username = []
     for key, reports in entries.items():
-        if reports["rankedCharacters"]:
-            #print("reports = %s" % reports["data"])
+        if reports and "rankedCharacters" in reports and reports["rankedCharacters"]:
             for report in reports["rankedCharacters"]:
                 if report["name"] not in username:
                     username.append(report["name"])
@@ -389,6 +387,10 @@ def update_userdata(server_id, server_name, username):
 
         msg = ""
         for key, user in user_data.items():
+            # the player may not have raid data, the report could be for 5-man instance
+            if not user:
+                continue
+
             #print("user = %s" % user)
             try:
                 class_id = user["classID"]
@@ -398,15 +400,13 @@ def update_userdata(server_id, server_name, username):
                             # found possible class
                             if class_id == 0:
                                 class_id = classs
-                            else: # not an uniq spec name, can't determinate the class
-                                class_id = 0
-                                break
                 # can't determinate the class
                 if class_id == 0:
+                    print(f"The class_id is 0, and spec = {spec}: {user}")
                     continue
             except:
                 print("============ Error ============")
-                print(user)
+                print(f"{user}")
                 continue
 
             list_str = ""
