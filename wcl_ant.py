@@ -197,7 +197,7 @@ def gen_query_code(server_name, users, guilds, starttime):
     query += "}}"
     return query
 
-def gen_query_user(server_name, username, userdata):
+def gen_query_user(server_name, username, userdata, metric=None):
     idx = 1
     partition = 4
     partition_name = "P4"
@@ -208,7 +208,10 @@ def gen_query_user(server_name, username, userdata):
             query += "c%s: character(name: \"%s\", serverRegion:\"tw\", serverSlug: \"%s\") { id name classID " % (idx, name, server_name)
             for zone in zones:
                 for size in ["10", "25"]:
-                    query += "D%s: zoneRankings(zoneID: %s, size: %s, partition: %s)," % (zone + "_" + size, zone, size, partition)
+                    metrics_param = ""
+                    if metric:
+                        metrics_param = ", metric: %s" % metric
+                    query += "D%s: zoneRankings(zoneID: %s, size: %s, partition: %s%s)," % (zone + "_" + size, zone, size, partition, metrics_param)
             query += "} \n"
             idx += 1
 
@@ -345,9 +348,11 @@ def write_target(server_name, filename, userdata):
 
 def update_userdata(server_id, server_name, username):
     len_username = len(username)
-    idx = 1
+    idx = 0
     step = 40
     userdata = read_userdata("server/%s" % server_id) or {}
+    combined_data = {}  # Store all character data (both default and HPS queries)
+
     while True:
         points = query_points() # requires 23 points
         print("\nRate Limit: %s points / hour, Points Spent: %s Points, Reset In: %s minutes\n" % (points["limitPerHour"], points["pointsSpentThisHour"], int(points["pointsResetIn"]/60)))
@@ -367,10 +372,10 @@ def update_userdata(server_id, server_name, username):
             print("No new report!!")
             return userdata
 
-        print("\n\nget user data from %s to %s/%s" % (idx, end - 1, len_username))
+        print("\n\nget user data from %s to %s/%s" % (idx + 1, end, len_username))
 
+        # Get standard data first (default DPS metric)
         query = gen_query_user(server_name, username[idx:end], userdata)
-        idx += step
         print("query = %s" % query)
         result = wcl_query(query)
         result = result.replace("Noclasssetforthischaracter.ClicktheUpdatebuttonintheupperrighttoestablishaclass.", "")
@@ -385,13 +390,62 @@ def update_userdata(server_id, server_name, username):
             result = result.replace("No class set for this character. Click the Update button in the upper right to establish a class.", "")
             user_data = json.loads(result)["data"]["characterData"]
 
-        msg = ""
+        # Save standard data in combined_data
         for key, user in user_data.items():
-            # the player may not have raid data, the report could be for 5-man instance
-            if not user:
-                continue
+            if user:
+                name = user.get("name")
+                if name:
+                    combined_data[name] = user
 
-            #print("user = %s" % user)
+        # Check for healers that need HPS data
+        holy_healers = []
+        for name, user in combined_data.items():
+            for zone in zones:
+                for size in ["10", "25"]:
+                    zone_name = 'D' + zone + '_' + size
+                    if zone_name in user and "rankings" in user[zone_name]:
+                        for ranking in user[zone_name]["rankings"]:
+                            if "bestSpec" in ranking and ranking["bestSpec"] in ["Holy", "Discipline", "Restoration"]:
+                                if name not in holy_healers:
+                                    holy_healers.append(name)
+                                break
+
+        # If we found Holy healers, query them with HPS metric
+        if holy_healers:
+            print(f"Found Holy healers that need HPS metric query: {holy_healers}")
+
+            # Query Holy healers with HPS metric
+            hps_query = gen_query_user(server_name, holy_healers, userdata, "hps")
+            print(f"HPS query for Holy healers: {hps_query}")
+            hps_result = wcl_query(hps_query)
+            hps_result = hps_result.replace("Noclasssetforthischaracter.ClicktheUpdatebuttonintheupperrighttoestablishaclass.", "")
+            hps_result = hps_result.replace("No class set for this character. Click the Update button in the upper right to establish a class.", "")
+
+            try:
+                hps_user_data = json.loads(hps_result)["data"]["characterData"]
+            except:
+                print("########################### Exceed the limit during HPS query, sleep 1 hour #####################################")
+                time.sleep(3600)
+                hps_result = wcl_query(hps_query)
+                hps_result = hps_result.replace("Noclasssetforthischaracter.ClicktheUpdatebuttonintheupperrighttoestablishaclass.", "")
+                hps_result = hps_result.replace("No class set for this character. Click the Update button in the upper right to establish a class.", "")
+                hps_user_data = json.loads(hps_result)["data"]["characterData"]
+
+            # Update combined_data with HPS metric data for Holy healers
+            for key, user in hps_user_data.items():
+                if user:
+                    name = user.get("name")
+                    if name and name in combined_data:
+                        # Replace zoneRankings data for this Holy character with HPS data
+                        for zone in zones:
+                            for size in ["10", "25"]:
+                                zone_name = 'D' + zone + '_' + size
+                                if zone_name in user:
+                                    combined_data[name][zone_name] = user[zone_name]
+
+        # Process all data in combined_data
+        msg = ""
+        for name, user in combined_data.items():
             try:
                 class_id = user["classID"]
                 if class_id == 0:
@@ -410,7 +464,7 @@ def update_userdata(server_id, server_name, username):
                 continue
 
             list_str = ""
-            msg += "\n[\"%s\"] =\"" % (user["name"])
+            msg += "\n[\"%s\"] =\"" % (name)
             for zone in zones:
                 for size in ["10", "25"]:
                     zone_str = ""
@@ -420,14 +474,14 @@ def update_userdata(server_id, server_name, username):
                             spec = allstar["spec"]
                             spec_id = get_spec_id(class_id, spec)
                             if spec_id == '0':
-                                print("Error: %s %s %s %s" % (user["name"], class_id, spec, zone_name))
+                                print("Error: %s %s %s %s" % (name, class_id, spec, zone_name))
                                 continue
                             points = round(float(allstar["points"]), 2)
                             rank = allstar["rank"]
                             region_rank = allstar["regionRank"]
                             server_rank = allstar["serverRank"]
                             rank_percent = round(float(allstar["rankPercent"]), 2)
-                            color = add_color_code(user["name"], rank_percent)
+                            color = add_color_code(name, rank_percent)
 
                             if zone_str:
                                 zone_str += ","
@@ -440,16 +494,21 @@ def update_userdata(server_id, server_name, username):
 
             if list_str:
                 now = int(datetime.datetime.now().timestamp())
-                userdata[user["name"]] = "{%s, %s, {%s}}" % (class_id, now, list_str)
+                userdata[name] = "{%s, %s, {%s}}" % (class_id, now, list_str)
+                msg += userdata[name]
 
-                msg += userdata[user["name"]]
+        if msg:
             write_target(server_name, "%s.lua" % server_id, userdata)
-        msg += "\n"
-        print("==========================================")
-        print(msg)
-        print("==========================================")
-        write_userdata("server/%s" % server_id, userdata)
+            msg += "\n"
+            print("==========================================")
+            print(msg)
+            print("==========================================")
+            write_userdata("server/%s" % server_id, userdata)
 
+        # Clear combined_data for the next batch
+        combined_data = {}
+
+        idx += step
         if stop:
             break
 
